@@ -4,10 +4,22 @@ import javax.swing.*;
 import ui.panel.TransactionPanel;
 import ui.panel.CategoryPanel;
 import ui.panel.ReportPanel;
+import model.User;
 
 public class MainFrame extends JFrame {
-  public MainFrame() {
-    super("QuanLiThuChiCafe");
+  private final User currentUser;
+
+  // Dùng khi mở sau đăng nhập
+  public MainFrame(User user) {
+    super("QuanLiThuChiCafe - " + (user!=null ? user.getUsername() + " (" + user.getRole() + ")" : ""));
+    this.currentUser = user;
+    initUI();
+  }
+
+  // Giữ constructor cũ (nếu cần chạy thẳng, không login)
+  public MainFrame() { this(null); }
+
+  private void initUI() {
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setSize(1100, 700);
     setLocationRelativeTo(null);
@@ -20,6 +32,10 @@ public class MainFrame extends JFrame {
   }
 
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> new MainFrame().setVisible(true));
+    SwingUtilities.invokeLater(() -> {
+      // Mặc định: mở màn hình đăng nhập
+      new LoginFrame().setVisible(true);
+      // Nếu muốn bỏ đăng nhập: new MainFrame().setVisible(true);
+    });
   }
 }
