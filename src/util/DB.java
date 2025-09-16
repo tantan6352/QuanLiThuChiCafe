@@ -4,9 +4,9 @@ import java.sql.*;
 
 public class DB {
   private static final String URL  =
-    "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12797407?useSSL=true&requireSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
-  private static final String USER = "sql12797407";
-  private static final String PASS = "XdvqPW4iPA";
+    "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12798839";
+  private static final String USER = "sql12798839";
+  private static final String PASS = "uyv5x6hDg7";
 
   static {
     try { Class.forName("com.mysql.cj.jdbc.Driver"); }

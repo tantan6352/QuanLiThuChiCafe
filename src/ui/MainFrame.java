@@ -9,7 +9,6 @@ import model.User;
 public class MainFrame extends JFrame {
   private final User currentUser;
 
-  // Dùng khi mở sau đăng nhập
   public MainFrame(User user) {
     super("QuanLiThuChiCafe - " + (user!=null ? user.getUsername() + " (" + user.getRole() + ")" : ""));
     this.currentUser = user;
