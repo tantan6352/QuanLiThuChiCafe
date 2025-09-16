@@ -3,7 +3,8 @@ package ui.panel;
 import dao.TransactionDao;
 import dao.CategoryDao;
 import dao.AccountDao;
-import model.TransactionType;  // <— dùng import này
+import dao.UserDao;                     // NEW
+import model.TransactionType;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -18,9 +19,9 @@ public class ReportPanel extends JPanel {
   private final CategoryDao   catDao  = new CategoryDao();
   private final AccountDao    accDao  = new AccountDao();
 
-  // Đổi tên model -> tblModel
+  // NEW: thêm cột "Người nhập"
   private final DefaultTableModel tblModel = new DefaultTableModel(
-      new Object[]{"ID","Thời điểm","Loại","Danh mục","Tài khoản","Số tiền","Ghi chú"}, 0) {
+      new Object[]{"ID","Thời điểm","Loại","Danh mục","Tài khoản","Số tiền","Ghi chú","Người nhập"}, 0) {
     @Override public boolean isCellEditable(int r, int c) { return false; }
   };
 
@@ -75,8 +76,9 @@ public class ReportPanel extends JPanel {
 
       tblModel.setRowCount(0);
 
-      Map<Integer,String> catMap = catDao.nameMap();
-      Map<Integer,String> accMap = accDao.nameMap();
+      Map<Integer,String> catMap  = catDao.nameMap();
+      Map<Integer,String> accMap  = accDao.nameMap();
+      Map<Integer,String> userMap = new UserDao().nameMap();      // NEW
 
       TransactionType typeFilter =
           "INCOME".equals(sel) ? TransactionType.INCOME :
@@ -90,6 +92,9 @@ public class ReportPanel extends JPanel {
           kw.isEmpty() ? null : kw, 5000, 0);
 
       for (var t : list) {
+        String createdByName = (t.getCreatedBy()==null) ? "" :
+            userMap.getOrDefault(t.getCreatedBy(), String.valueOf(t.getCreatedBy())); // NEW
+
         tblModel.addRow(new Object[]{
           t.getId(),
           t.getOccuredAt(),
@@ -97,7 +102,8 @@ public class ReportPanel extends JPanel {
           catMap.getOrDefault(t.getCategoryId(), String.valueOf(t.getCategoryId())),
           accMap.getOrDefault(t.getAccountId(), String.valueOf(t.getAccountId())),
           t.getAmount(),
-          t.getNote()
+          t.getNote(),
+          createdByName     // NEW
         });
       }
     } catch (Exception e) {
@@ -113,7 +119,8 @@ public class ReportPanel extends JPanel {
       if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
       try (var fw = new FileWriter(fc.getSelectedFile(), StandardCharsets.UTF_8)) {
-        fw.write("ID,Ngay gio,Loai,Danh muc,Tai khoan,So tien,Ghi chu\n");
+        // NEW: thêm cột Nguoi nhap
+        fw.write("ID,Ngay gio,Loai,Danh muc,Tai khoan,So tien,Ghi chu,Nguoi nhap\n");
         for (int r=0; r<tblModel.getRowCount(); r++) {
           StringBuilder line = new StringBuilder();
           for (int c=0; c<tblModel.getColumnCount(); c++) {

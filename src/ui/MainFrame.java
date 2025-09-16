@@ -24,7 +24,8 @@ public class MainFrame extends JFrame {
     setLocationRelativeTo(null);
 
     JTabbedPane tabs = new JTabbedPane();
-    tabs.addTab("Giao dịch", new TransactionPanel());
+    // TRUYỀN currentUser vào panel giao dịch
+    tabs.addTab("Giao dịch", new TransactionPanel(currentUser));
     tabs.addTab("Danh mục",  new CategoryPanel());
     tabs.addTab("Báo cáo",   new ReportPanel());
     setContentPane(tabs);
@@ -34,7 +35,7 @@ public class MainFrame extends JFrame {
     SwingUtilities.invokeLater(() -> {
       // Mặc định: mở màn hình đăng nhập
       new LoginFrame().setVisible(true);
-      // Nếu muốn bỏ đăng nhập: new MainFrame().setVisible(true);
+
     });
   }
 }

@@ -3,9 +3,11 @@ package ui.panel;
 import dao.TransactionDao;
 import dao.CategoryDao;
 import dao.AccountDao;
+import dao.UserDao;                 // NEW
 import model.TransactionType;
 import model.Category;
 import model.Account;
+import model.User;                 // NEW
 import service.TransactionService;
 
 import javax.swing.*;
@@ -19,9 +21,11 @@ public class TransactionPanel extends JPanel {
   private final TransactionService service = new TransactionService(new TransactionDao());
   private final CategoryDao categoryDao = new CategoryDao();
   private final AccountDao  accountDao  = new AccountDao();
+  private final User currentUser;                       // NEW
 
+  // NEW: thêm cột "Người nhập"
   private final DefaultTableModel model = new DefaultTableModel(
-      new Object[]{"ID","Thời điểm","Loại","Danh mục","Tài khoản","Số tiền","Ghi chú"}, 0) {
+      new Object[]{"ID","Thời điểm","Loại","Danh mục","Tài khoản","Số tiền","Ghi chú","Người nhập"}, 0) {
     @Override public boolean isCellEditable(int r, int c) { return false; }
   };
 
@@ -32,10 +36,19 @@ public class TransactionPanel extends JPanel {
   private JTextField tfAmt, tfNote;
   private JLabel lbIncome, lbExpense, lbProfit;
 
-  public TransactionPanel() {
+  // NEW: constructor nhận user
+  public TransactionPanel(User u) {
+    this.currentUser = u;
+    initUI();
+  }
+
+  // Giữ constructor cũ (chạy không login)
+  public TransactionPanel() { this(null); }
+
+  private void initUI() {
     setLayout(new BorderLayout(8,8));
 
-    // ===== Form nhập (GridBagLayout 2 hàng, không bị cắt nút) =====
+    // ===== Form nhập (GridBagLayout 2 hàng) =====
     JPanel form = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(4,8,4,8);
@@ -118,9 +131,12 @@ public class TransactionPanel extends JPanel {
       BigDecimal amt = new BigDecimal(tfAmt.getText().trim());
       if (amt.signum() <= 0) throw new IllegalArgumentException("Số tiền phải > 0");
 
+      // NEW: lấy uid người đang đăng nhập
+      Integer uid = (currentUser != null) ? currentUser.getId() : null;
+
       long id = (type==TransactionType.INCOME)
-          ? service.addIncome(cat.getId(), acc.getId(), amt, tfNote.getText(), null)
-          : service.addExpense(cat.getId(), acc.getId(), amt, tfNote.getText(), null);
+          ? service.addIncome(cat.getId(), acc.getId(), amt, tfNote.getText(), uid)
+          : service.addExpense(cat.getId(), acc.getId(), amt, tfNote.getText(), uid);
 
       JOptionPane.showMessageDialog(this, "Đã thêm giao dịch #" + id);
       tfAmt.setText(""); tfNote.setText("");
@@ -164,8 +180,9 @@ public class TransactionPanel extends JPanel {
   private void reloadTable() {
     try {
       model.setRowCount(0);
-      Map<Integer,String> catMap = categoryDao.nameMap();
-      Map<Integer,String> accMap = accountDao.nameMap();
+      Map<Integer,String> catMap  = categoryDao.nameMap();
+      Map<Integer,String> accMap  = accountDao.nameMap();
+      Map<Integer,String> userMap = new UserDao().nameMap();           // NEW
 
       var list = new TransactionDao()
           .search(LocalDate.now().withDayOfMonth(1).atStartOfDay(),
@@ -173,6 +190,9 @@ public class TransactionPanel extends JPanel {
                   null, null, null, null, 1000, 0);
 
       for (var t : list) {
+        String createdByName = (t.getCreatedBy()==null) ? "" :
+            userMap.getOrDefault(t.getCreatedBy(), String.valueOf(t.getCreatedBy())); // NEW
+
         model.addRow(new Object[]{
           t.getId(),
           t.getOccuredAt(),
@@ -180,7 +200,8 @@ public class TransactionPanel extends JPanel {
           catMap.getOrDefault(t.getCategoryId(), String.valueOf(t.getCategoryId())),
           accMap.getOrDefault(t.getAccountId(), String.valueOf(t.getAccountId())),
           t.getAmount(),
-          t.getNote()
+          t.getNote(),
+          createdByName   // NEW
         });
       }
     } catch (Exception e) {

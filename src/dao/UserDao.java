@@ -4,6 +4,8 @@ import model.User;
 import util.DB;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserDao {
   private User map(ResultSet rs) throws SQLException {
@@ -22,6 +24,16 @@ public class UserDao {
       try (ResultSet rs = ps.executeQuery()) {
         return rs.next() ? map(rs) : null;
       }
+    }
+  }
+
+  // NEW: id -> username
+  public Map<Integer,String> nameMap() throws SQLException {
+    try (Connection c = DB.get(); Statement st = c.createStatement()) {
+      ResultSet rs = st.executeQuery("SELECT id, username FROM users");
+      Map<Integer,String> m = new HashMap<>();
+      while (rs.next()) m.put(rs.getInt(1), rs.getString(2));
+      return m;
     }
   }
 }
