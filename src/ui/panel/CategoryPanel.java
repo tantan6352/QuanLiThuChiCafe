@@ -3,6 +3,8 @@ package ui.panel;
 import dao.CategoryDao;
 import model.Category;
 import model.TransactionType;
+import ui.BackgroundPanel;
+import ui.UiStyle;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -10,7 +12,7 @@ import java.awt.*;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
-public class CategoryPanel extends JPanel {
+public class CategoryPanel extends BackgroundPanel {
   private final CategoryDao dao = new CategoryDao();
   private final DefaultTableModel model = new DefaultTableModel(
       new Object[]{"ID","Tên danh mục","Loại"}, 0) {
@@ -22,25 +24,34 @@ public class CategoryPanel extends JPanel {
   private JTable table;
 
   public CategoryPanel() {
+    super("/icons/category.png"); // ẢNH NỀN
     setLayout(new BorderLayout(8,8));
 
-    // Form
+    // Form (trong suốt để thấy nền)
     JPanel form = new JPanel(new FlowLayout(FlowLayout.LEFT, 8,8));
+    form.setOpaque(false);
+
     cbType = new JComboBox<>(TransactionType.values());
     tfName = new JTextField(20);
     JButton btnAdd = new JButton("Thêm");
     JButton btnRename = new JButton("Đổi tên");
     JButton btnDelete = new JButton("Xóa");
+  
 
     form.add(new JLabel("Loại:")); form.add(cbType);
-    form.add(new JLabel("Tên:")); form.add(tfName);
+    form.add(new JLabel("Tên:"));  form.add(tfName);
     form.add(btnAdd); form.add(btnRename); form.add(btnDelete);
     add(form, BorderLayout.NORTH);
 
     // Table
     table = new JTable(model);
-    table.setRowHeight(22);
-    add(new JScrollPane(table), BorderLayout.CENTER);
+    UiStyle.prettyTable(table);
+    UiStyle.centerHeader(table);
+
+    JScrollPane sp = new JScrollPane(table);
+    sp.setOpaque(false);
+    sp.getViewport().setOpaque(false);
+    add(sp, BorderLayout.CENTER);
 
     // Events
     btnAdd.addActionListener(e -> onAdd());
@@ -87,7 +98,7 @@ public class CategoryPanel extends JPanel {
       dao.delete(id);
       reload();
     } catch (SQLIntegrityConstraintViolationException fk) {
-      JOptionPane.showMessageDialog(this, "Không thể xóa: danh mục đang được dùng trong giao dịch.", "Ràng buộc dữ liệu", JOptionPane.WARNING_MESSAGE);
+      JOptionPane.showMessageDialog(this, "Không thể xóa: danh mục đang dùng trong giao dịch.", "Ràng buộc dữ liệu", JOptionPane.WARNING_MESSAGE);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }

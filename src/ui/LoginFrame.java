@@ -5,6 +5,8 @@ import service.AuthService;
 
 import javax.swing.*;
 import java.awt.*;
+import util.BgPanel;
+import util.BgPanel;
 
 public class LoginFrame extends JFrame {
   private final JTextField tfUser = new JTextField(18);
@@ -18,19 +20,27 @@ public class LoginFrame extends JFrame {
     setSize(380, 200);
     setLocationRelativeTo(null);
 
-    var p = new JPanel(new GridBagLayout());
-    var g = new GridBagConstraints();
+    setIconImage(new ImageIcon(getClass().getResource("/icons/coffee.png")).getImage());
+
+    // NỀN
+    BgPanel bg = new BgPanel("/icons/baner.png");
+    bg.setAlpha(0.5f);
+    setContentPane(bg);
+
+
+    // 3) Form nội dung
+    JPanel p = new JPanel(new GridBagLayout());
+    p.setOpaque(false); // QUAN TRỌNG: để thấy ảnh nền
+    GridBagConstraints g = new GridBagConstraints();
     g.insets = new Insets(6,8,6,8); g.anchor = GridBagConstraints.WEST;
 
     g.gridx=0; g.gridy=0; p.add(new JLabel("Tài khoản:"), g);
-    g.gridx=1; g.gridy=0; g.fill = GridBagConstraints.HORIZONTAL; g.weightx=1; p.add(tfUser, g);
+    g.gridx=1; g.fill = GridBagConstraints.HORIZONTAL; g.weightx=1; p.add(tfUser, g);
     g.gridx=0; g.gridy=1; g.fill = GridBagConstraints.NONE; g.weightx=0; p.add(new JLabel("Mật khẩu:"), g);
-    g.gridx=1; g.gridy=1; g.fill = GridBagConstraints.HORIZONTAL; g.weightx=1; p.add(pfPass, g);
+    g.gridx=1; g.fill = GridBagConstraints.HORIZONTAL; g.weightx=1; p.add(pfPass, g);
+    g.gridx=1; g.gridy=2; g.fill = GridBagConstraints.NONE; g.anchor=GridBagConstraints.EAST; p.add(btnLogin, g);
 
-    g.gridx=1; g.gridy=2; g.fill = GridBagConstraints.NONE; g.anchor=GridBagConstraints.EAST;
-    p.add(btnLogin, g);
-
-    setContentPane(p);
+    bg.add(p, BorderLayout.CENTER);
 
     btnLogin.addActionListener(e -> doLogin());
     getRootPane().setDefaultButton(btnLogin);
@@ -41,7 +51,6 @@ public class LoginFrame extends JFrame {
       String u = tfUser.getText().trim();
       String p = new String(pfPass.getPassword());
       User user = auth.login(u, p);
-      // Mở MainFrame, truyền user
       new MainFrame(user).setVisible(true);
       dispose();
     } catch (Exception ex) {

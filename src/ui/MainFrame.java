@@ -22,20 +22,29 @@ public class MainFrame extends JFrame {
     setDefaultCloseOperation(EXIT_ON_CLOSE);
     setSize(1100, 700);
     setLocationRelativeTo(null);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setSize(1100, 700);
+    setLocationRelativeTo(null);
+
+    UiStyle.setWindowIcon(this, "/icons/coffee.png", 24, 24);  // icon cửa sổ
 
     JTabbedPane tabs = new JTabbedPane();
-    // TRUYỀN currentUser vào panel giao dịch
-    tabs.addTab("Giao dịch", new TransactionPanel(currentUser));
-    tabs.addTab("Danh mục",  new CategoryPanel());
-    tabs.addTab("Báo cáo",   new ReportPanel());
+    tabs.addTab("Giao dịch",
+        UiStyle.icon("/icons/txn.png",16,16), new ui.panel.TransactionPanel(currentUser));
+    tabs.addTab("Danh mục",
+        UiStyle.icon("/icons/category.png",16,16), new ui.panel.CategoryPanel());
+    tabs.addTab("Báo cáo",
+        UiStyle.icon("/icons/report.png",16,16), new ui.panel.ReportPanel());
     setContentPane(tabs);
+
+
   }
 
   public static void main(String[] args) {
-    SwingUtilities.invokeLater(() -> {
-      // Mặc định: mở màn hình đăng nhập
-      new LoginFrame().setVisible(true);
-
-    });
-  }
+  SwingUtilities.invokeLater(() -> {
+    UiStyle.installSystemLaf();             // LAF hệ thống
+    UiStyle.applyGlobalFont("Segoe UI", 12); // font toàn cục (tùy chọn)
+    new LoginFrame().setVisible(true);
+  });
+}
 }
