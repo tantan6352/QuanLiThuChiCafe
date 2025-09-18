@@ -5,6 +5,7 @@ import ui.panel.TransactionPanel;
 import ui.panel.CategoryPanel;
 import ui.panel.ReportPanel;
 import model.User;
+//
 
 public class MainFrame extends JFrame {
   private final User currentUser;
